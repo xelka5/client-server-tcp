@@ -9,7 +9,7 @@
 #include <arpa/inet.h>
 #include "server-impl.h"
 
-#define PORT 8040
+#define PORT 4412
 #define HOST "127.0.0.1" 
 #define SA struct sockaddr 
 

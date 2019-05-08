@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 #include "client-impl.h"
 
-#define PORT 8040 
+#define PORT 4412
 #define SA struct sockaddr 
 
 int main() 
