@@ -1,32 +1,12 @@
-#include "client-impl.h"
-
 #include <stdio.h> 
 #include <unistd.h>
 #include <stdlib.h> 
 #include <string.h> 
 
+#include "client-impl.h"
+#include "common.h"
+
 #define MAX_BUFFER_SIZE 1000
-
-enum status{Ack, Nack};
-enum operation{Order, Refill, GetAccumulation};
-
-typedef struct Article {
-   char name[50];
-   double price;
-   int quantity;
-}Article;  
-
-typedef struct Package {
-   enum operation packageType;
-   char clubName[50];
-   struct Article article;
-   char date[10];
-}Package;
-
-typedef struct Response {
-   enum status responseStatus;
-   char responsePayload[100];
-}Response;
 
 void orderDrink(Package** package, Response** response, int sockfd);
 void refillDrink(Package** package, Response** response, int sockfd);
@@ -139,7 +119,7 @@ void getAccumulationForDay(Package** package, Response** response, int sockfd) {
 	scanf(" %s", (*package)->clubName);
 
 	printf("Enter the date: ");
-	scanf(" %s", (*package)->
+	scanf(" %s", (*package)->date);
 
 	sendPackage(package, response, sockfd);
 

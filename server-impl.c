@@ -1,32 +1,15 @@
-#include "server-impl.h"
-#include "mysql.h"
 #include <stdlib.h> 
 #include <unistd.h>
 #include <string.h> 
 #include <stdio.h>
+#include <my_global.h>
+#include <mysql.h>
+
+#include "database-utils.h"
+#include "database-impl.h"
+#include "server-impl.h"
 
 #define MAX_BUFFER_SIZE 1000 
-
-enum operation{Order, Refill, GetAccumulation, GetClub};
-enum status{Ack, Nack};
-
-typedef struct Article {
-   char name[50];
-   double price;
-   int quantity;
-}Article;  
-
-typedef struct Package {
-   enum operation packageType;
-   char clubName[50];
-   struct Article article;
-   char date[10];
-}Package;
-
-typedef struct Response {
-   enum status responseStatus;
-   char responsePayload[100];
-}Response;
 
 void process(int sockfd) 
 { 
@@ -40,7 +23,6 @@ void process(int sockfd)
 	bzero(buffer, MAX_BUFFER_SIZE); 
 	
         read(sockfd, buffer, sizeof(buffer)); 
-	printf("READING\n");
         memcpy(package, buffer, sizeof(buffer));
 
 	printf("Package type: %d\n", package->packageType);
@@ -60,8 +42,10 @@ void process(int sockfd)
 		break;
 	  case 2:
 		response->responseStatus = Ack;
-		strcpy(response->responsePayload, "Get accumulation successful");
-		printf("From client: %s %lf %d\n", package->article.name, package->article.price, package->article.quantity);
+		printf("From client: %s %s\n", package->clubName, package->date);
+		printf("Response db: %s\n", checkDaysProfitForClub(package, package->date));
+		printf("AFTER!!\n");
+		//strcpy(response->responsePayload, checkDaysProfitForClub(package));
 		break;	
         }
         
