@@ -8,9 +8,15 @@
 #include <arpa/inet.h>
 #include "client-impl.h"
 
-#define PORT 4442
+#define PORT 9898
+#define HOST "127.0.0.1"
 #define SA struct sockaddr 
 
+
+/** 
+ * Client side main processing service implemented
+ * by socket connection over specified host and port.
+ */
 int main() 
 { 
     int sockfd, connfd; 
@@ -18,7 +24,7 @@ int main()
   
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
-        printf("socket creation failed...\n"); 
+        printf("Socket creation failed...\n"); 
         exit(0); 
     } else {
         printf("Socket successfully created..\n"); 
@@ -27,14 +33,14 @@ int main()
     bzero(&servaddr, sizeof(servaddr)); 
   
     servaddr.sin_family = AF_INET; 
-    servaddr.sin_addr.s_addr = inet_addr("127.0.0.1"); 
+    servaddr.sin_addr.s_addr = inet_addr(HOST); 
     servaddr.sin_port = htons(PORT); 
   
     if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
-        printf("connection with the server failed...\n"); 
+        printf("Connection with the server failed...\n"); 
         exit(0); 
     } else { 
-        printf("connected to the server..\n");
+        printf("Connected to the server..\n");
     } 
   
     process(sockfd); 

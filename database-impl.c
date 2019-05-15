@@ -1,26 +1,15 @@
-#include <my_global.h>
-#include <mysql.h>
-#include <string.h>
-
-#include "database-utils.h"
 #include "database-impl.h"
 
-/*int main() {
-
-     Package* package = malloc(sizeof(Package));
-     strcpy(package->article.name, "Becks");
-     package->article.quantity = 87;
-     package->article.price = 5;
-     strcpy(package->clubName,"Club331");
-     strcpy(package->date,"2019-05-12");
-     //printf("%s\n", fillNewArticle(package));
-     printf("%s\n", checkDaysProfitForClub(package));
-     //printf("%s\n", orderDrink(package));
-}*/
-
-char* fillNewArticle(Package* package) {
+/** 
+ * Function for refilling specified club with new article, quantity and price.
+ * In case club doesn't exist, the club with specified club name is added as 
+ * new club. In case article already exists in the club, the update query is 
+ * processed else new article is inserted in the club. In case of error user
+ * gets notified about the erro invocation. In case of success user gets notified
+ * about success operation.
+ */
+char* fillNewArticle(Package *package, MYSQL *connection) {
 	
-	MYSQL* connection = connectToMysql();
 	int clubId;
 	char* serverResponse = malloc(200);
    
@@ -40,21 +29,26 @@ char* fillNewArticle(Package* package) {
 	    }
 	} else {
            foundArticle->quantity = foundArticle->quantity + package->article.quantity;
-	   printf("Existing quantity: %d, adding: %d\n", foundArticle->quantity, package->article.quantity);
 	   if(updateArticle(connection, *foundArticle, clubId) == -1) {
 		strcpy(serverResponse, "An error occured when refilling article.");
 	   } else {
 		strcpy(serverResponse, "Successfully refilled existing article in the specified club.");
 	   }
 	}
-	
-  	disconnectFromMysql(connection);
-	return "test";
+
+	return serverResponse;
 }
 
-char* orderDrink(Package* package) {
 
-	MYSQL* connection = connectToMysql();
+/** 
+ * Function for ordering drink for specified club. In case club doesn't exist
+ * user gets notified for inserting wrong club name. In case artile not found
+ * client gets notified about wrong drink name. If there is not enough quantity
+ * appropriate message is returned. In case of success, success message is returned
+ * to the client.
+ */
+char* orderDrink(Package *package, MYSQL *connection) {
+
 	int clubId = checkIfClubExists(package->clubName);
 	char* serverResponse = malloc(200);
 
@@ -62,8 +56,6 @@ char* orderDrink(Package* package) {
 	    disconnectFromMysql(connection);
 	    return "Club doesn't exist. Try again.";
 	}
-
-	printf("ClubID: %d\n", clubId);
 
 	Article* foundArticle = checkIfArticleExistsInTheClub(connection, package->article, clubId);
 
@@ -85,16 +77,18 @@ char* orderDrink(Package* package) {
 	     }
 	}
 	
-	disconnectFromMysql(connection);
 	return serverResponse;
 }
 
-char* checkDaysProfitForClub(Package *package) {
+/** 
+ * Function for checking one club's profit for the specified date.
+ * If no orders are received on that date, client gets appropriate message,
+ * else client gets the days profit for that club.
+ */
+char* checkDaysProfitForClub(Package *package, MYSQL *connection) {
 
 	char query[MAX_QUERY_SIZE];
-  	MYSQL* connection = connectToMysql();
 	char* serverResponse = malloc(200);
-
 
 	bzero(query, MAX_QUERY_SIZE);
 
@@ -105,8 +99,6 @@ char* checkDaysProfitForClub(Package *package) {
 	strcat(query, package->date);
 	strcat(query, "'");
 
-	printf("Query: %s\n", query);
-
 	if (mysql_query(connection, query)) 
   	{
       		return get_error_message(connection);
@@ -116,7 +108,6 @@ char* checkDaysProfitForClub(Package *package) {
 
 	MYSQL_ROW row = mysql_fetch_row(result);
 	mysql_free_result(result);
-	disconnectFromMysql(connection);
 
 	if(!row[0]) {
 	    return "There were no orders on specified date for specified club.";
@@ -126,10 +117,13 @@ char* checkDaysProfitForClub(Package *package) {
 	strcat(serverResponse, row[0]);
 
 	return serverResponse;
-
-
 }
 
+/** 
+ * Function for checking one club's profit for the specified date.
+ * If no orders are received on that date, client gets appropriate message,
+ * else client gets the days profit for that club.
+ */
 int order(MYSQL* connection, Article article, int quantityOrdered, int deleteArticleFlag, int clubId) {
 	
 	char query[MAX_QUERY_SIZE];
@@ -142,8 +136,6 @@ int order(MYSQL* connection, Article article, int quantityOrdered, int deleteArt
 	sprintf(quantityQueryParam,"%d", quantityOrdered);
 	strcat(query, quantityQueryParam);
 	strcat(query, ",CURDATE())");
-
-	printf("Order query: %s\n", query);
 
 	if (mysql_query(connection, query)) 
 	{
@@ -164,6 +156,10 @@ int order(MYSQL* connection, Article article, int quantityOrdered, int deleteArt
 
 }
 
+/** 
+ * Function for inserting new club.
+ * Returns club id on success, -1 on fail.
+ */
 int insertNewClub(MYSQL* connection, char *clubName) {
 
 	char query[MAX_QUERY_SIZE];
@@ -178,6 +174,10 @@ int insertNewClub(MYSQL* connection, char *clubName) {
         return mysql_insert_id(connection);
 }
 
+/** 
+ * Function for inserting new article.
+ * Returns article id on success, -1 on fail.
+ */
 int insertNewArticle(MYSQL* connection, Article article, int clubId) {
 
 	char query[MAX_QUERY_SIZE];
@@ -196,8 +196,6 @@ int insertNewArticle(MYSQL* connection, Article article, int clubId) {
 	strcat(query, clubIdQueryParam);
 	strcat(query, ")");
 
-	printf("Query: %s\n", query);
-
 	if (mysql_query(connection, query)) 
 	{
 	    return -1;
@@ -206,6 +204,10 @@ int insertNewArticle(MYSQL* connection, Article article, int clubId) {
 	return mysql_insert_id(connection); 
 }
 
+/** 
+ * Function for updating already existing article.
+ * Returns 0 on success and -1 on fail.
+ */
 int updateArticle(MYSQL* connection, Article article, int clubId) {
 	
 	char query[MAX_QUERY_SIZE];
@@ -218,14 +220,18 @@ int updateArticle(MYSQL* connection, Article article, int clubId) {
 	sprintf(articleIdQueryParam,"%d", article.id);
 	strcat(query, articleIdQueryParam);
 
-	printf("Query: %s\n", query);
-
 	if (mysql_query(connection, query)) 
 	{
 	    return -1;
 	}
+	
+	return 0;
 }
 
+/** 
+ * Function for deleting already existing article.
+ * Returns 0 on success and -1 on fail.
+ */
 int deleteArticle(MYSQL* connection, Article article) {
 	char query[MAX_QUERY_SIZE];
 	char articleIdQueryParam[11];
@@ -233,7 +239,6 @@ int deleteArticle(MYSQL* connection, Article article) {
 	strcpy(query, "DELETE FROM article WHERE id = ");
 	sprintf(articleIdQueryParam,"%d", article.id);
 	strcat(query, articleIdQueryParam);	
-	printf("Delete query: %s\n", query);
 
 	if (mysql_query(connection, query)) 
 	{
@@ -243,6 +248,11 @@ int deleteArticle(MYSQL* connection, Article article) {
 	return 0;
 }
 
+/** 
+ * Function for checking if article exists in the database.
+ * Returns article data on success and NULL if article not found
+ * or on failure.
+ */
 Article* checkIfArticleExistsInTheClub(MYSQL* connection, Article article, int clubId) {
 
 	char query[MAX_QUERY_SIZE];
@@ -254,8 +264,6 @@ Article* checkIfArticleExistsInTheClub(MYSQL* connection, Article article, int c
 	strcat(query, "' and club.id=");
 	sprintf(clubIdQueryParam,"%d", clubId);
 	strcat(query, clubIdQueryParam);
-
-	printf("Query: %s\n", query);
 
 	if (mysql_query(connection, query)) 
 	{
@@ -286,6 +294,10 @@ Article* checkIfArticleExistsInTheClub(MYSQL* connection, Article article, int c
 	return foundArticle;
 }
 
+/** 
+ * Function for checking if club exists in the database.
+ * Returns club id on success and -1 on failure.
+ */
 int checkIfClubExists(char *clubName) {
    
    char query[100];
@@ -293,7 +305,6 @@ int checkIfClubExists(char *clubName) {
    strcpy(query, "SELECT id FROM club WHERE name = '");
    strcat(query, clubName);
    strcat(query, "' LIMIT 1;");
-   printf("QUERY: %s\n", query);
 
    MYSQL* connection = connectToMysql();
 

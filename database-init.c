@@ -31,8 +31,7 @@ int main(int argc, char **argv)
 void createDbTables(MYSQL* connection) {
 
   int i;
-  char clubs[6][150] = { DROP_CLUBS_TABLE, CREATE_CLUBS_TABLE, DROP_ARTICLE_TABLE, CREATE_ARTICLE_TABLE, DROP_ORDERS_TABLE,
-                          CREATE_ORDERS_TABLE };
+  char clubs[6][150] = { DROP_CLUBS_TABLE, CREATE_CLUBS_TABLE, DROP_ARTICLE_TABLE, CREATE_ARTICLE_TABLE, DROP_ORDERS_TABLE, CREATE_ORDERS_TABLE };
   for(i=0;i<6;i++) {
     if (mysql_query(connection, clubs[i])) {
       finish_with_error(connection);

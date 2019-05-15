@@ -1,11 +1,7 @@
-#include <my_global.h>
-#include <mysql.h>
-
 #include "database-utils.h"
 
-/* 
+/** 
  * Function for opening database connection
- * 
  */
 MYSQL* connectToMysql() {
 
@@ -24,17 +20,15 @@ MYSQL* connectToMysql() {
   return connection;
 }
 
-/* 
+/** 
  * Function for closing the existing database connection
- * 
  */
 void disconnectFromMysql(MYSQL* connection) {
    mysql_close(connection);
 }
 
-/* 
+/** 
  * Function for handling erros occured in the query processing
- * 
  */  
 void finish_with_error(MYSQL *connection)
 {
@@ -43,9 +37,8 @@ void finish_with_error(MYSQL *connection)
   exit(1);        
 }
 
-/* 
+/** 
  * Function for returning error message to the client
- * 
  */ 
 char* get_error_message(MYSQL *connection) {
   char* message = malloc(100);

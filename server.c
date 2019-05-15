@@ -9,10 +9,18 @@
 #include <arpa/inet.h>
 #include "server-impl.h"
 
-#define PORT 4442
+#define PORT 9898
 #define HOST "127.0.0.1" 
 #define SA struct sockaddr 
 
+/** 
+ * Server side main processing service implemented
+ * by socket connection over specified host and port.
+ * All clients are handled by the server at their own
+ * processes. The server is accepting multiple clients
+ * at once. When all clients disconnect from the server,
+ * socket is closed.
+ */
 int main() 
 { 
     int sockfd, connfd, len; 
@@ -22,7 +30,7 @@ int main()
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0); 
     if (sockfd == -1) { 
-        printf("socket creation failed...\n"); 
+        printf("Socket creation failed...\n"); 
         exit(0); 
     } else {
         printf("Socket successfully created..\n"); 
@@ -36,7 +44,7 @@ int main()
     servaddr.sin_port = htons(PORT); 
   
     if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
-        printf("socket bind failed...\n"); 
+        printf("Socket bind failed...\n"); 
         exit(0); 
     } else {
         printf("Socket successfully binded..\n"); 
@@ -53,7 +61,7 @@ int main()
  
         connfd = accept(sockfd, (SA*)&cli, &addr_size); 
 	if (connfd < 0) { 
-	   printf("server acccept failed...\n"); 
+	   printf("Server acccept failed...\n"); 
 	   exit(0); 
 	} else {
 	   printf("Connection accepted from %s:%d\n", inet_ntoa(cli.sin_addr), ntohs(cli.sin_port));

@@ -1,3 +1,6 @@
+#include <my_global.h>
+#include <mysql.h>
+
 #define DB_NAME "clubs"
 #define HOST "127.0.0.1"
 #define USERNAME "root"

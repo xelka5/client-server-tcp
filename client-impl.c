@@ -1,21 +1,9 @@
-#include <stdio.h> 
-#include <unistd.h>
-#include <stdlib.h> 
-#include <string.h> 
-
 #include "client-impl.h"
-#include "common.h"
 
-#define MAX_BUFFER_SIZE 1000
-
-void orderDrink(Package** package, Response** response, int sockfd);
-void refillDrink(Package** package, Response** response, int sockfd);
-void getAccumulationForDay(Package** package, Response** response, int sockfd);
-char* getClub(Package** package, Response** response, int sockfd);
-void exitFromProgram(int sockfd);
-
-void sendPackage(Package** package, Response** response, int sockfd);
-
+/** 
+ * Function for processing tcp socket connection between the server
+ * and the subscribed client.
+ */
 void process(int sockfd) 
 { 
     Package* package = NULL;
@@ -23,19 +11,8 @@ void process(int sockfd)
     
     int operation;
 
-   // do {
-	//
-	
-	//if(clubName == NULL) {
-	 //  printf("Club name doesn't exist in our database. Try again!\n");
-      //  }
-   // }while(clubName == NULL);
 
     while(1) { 
-	   //clubName = getClub(&package, &response, sockfd);
-	   //clubName="name";
-	   //refillDrink(&package, &response, sockfd, clubName);
-
 	   printf("Choose operation: \n1.Order\n2.Refill\n3.Get days accumulation\n4.Exit\n");
 	   scanf("%d",&operation);
 	   switch(operation) {
@@ -58,6 +35,13 @@ void process(int sockfd)
     } 
 }
 
+/** 
+ * Function for managing client side data input when ordering drink.
+ * Data:
+ *   1. Club name
+ *   2. Article name
+ *   3. Article quantity
+ */
 void orderDrink(Package** package, Response** response, int sockfd) {
 
 	*package = malloc(sizeof(Package));
@@ -82,6 +66,14 @@ void orderDrink(Package** package, Response** response, int sockfd) {
 	free(*response);	
 }
 
+/** 
+ * Function for managing client side data input when refilling drink.
+ * Data:
+ *   1. Club name
+ *   2. Article name
+ *   3. Article price
+ *   4. Article quantity
+ */
 void refillDrink(Package** package, Response** response, int sockfd) {
 	
 	*package = malloc(sizeof(Package));
@@ -108,6 +100,12 @@ void refillDrink(Package** package, Response** response, int sockfd) {
 	free(*response);	
 }
 
+/** 
+ * Function for managing client side data input when checking days profit.
+ * Data:
+ *   1. Club name
+ *   2. Date
+ */
 void getAccumulationForDay(Package** package, Response** response, int sockfd) {
 	
 	*package = malloc(sizeof(Package));
@@ -130,38 +128,19 @@ void getAccumulationForDay(Package** package, Response** response, int sockfd) {
 	free(*response);
 }
 
+/** 
+ * Function for closing socket connection
+ */
 void exitFromProgram(int sockfd) {
 	close(sockfd);
 	printf("Success exit!\n");
 	exit(0);
 }
 
-char* getClub(Package** package, Response** response, int sockfd) {
-
-	char* clubName = malloc(150);
-
-	*package = (Package*) malloc(sizeof(Package));
-	*response = (Response*) malloc(sizeof(Response));
-
-	//(*package)->packageType = GetClub;	
-	
-	printf("Enter club name: \n");
-	scanf("%s", (*package)->clubName);
-
-	sendPackage(package, response, sockfd);
-
-	printf("Response: %s\n", (*response)->responsePayload);
-
-	strcpy(clubName, (*response)->responsePayload);
-	printf("Returned name: %s\n", clubName);
-	
-	free(*package);
-	free(*response);
-	
-	return clubName;
-
-}
-
+/** 
+ * Utility function for sending package and receiving response 
+ * from the server.
+ */
 void sendPackage(Package** package, Response** response, int sockfd) {
 
 	char buffer[MAX_BUFFER_SIZE];
